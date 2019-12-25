@@ -1,0 +1,36 @@
+﻿@model List<Student.Web.Models.StudentModel>
+@{
+    ViewData["Title"] = "Students List";
+}
+<div class="col-md-10 col-md-offset-1">
+    <div class="well">
+        <table class="table table-bordered">
+            <thead>
+                <tr class="success">
+                    <td colspan="5">
+                        @ViewData["Title"]
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Email</td>
+                    <td>Firstname</td>
+                    <td>Lastname</td>
+                    <td>Mobile</td>
+                    <td>Action</td>
+                </tr>
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td>@item.Email</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Mobile</td>
+                    <td>Action</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -16,6 +16,7 @@ namespace Student.Api.Depencency
             builder.RegisterControllers(typeof(WebApiApplication).Assembly);
             builder.RegisterApiControllers(typeof(WebApiApplication).Assembly);
             builder.RegisterSource(new ViewRegistrationSource());
+           
             builder.RegisterModule<ServiceDependency>();
             var container = builder.Build();
             GlobalConfiguration.Configuration.DependencyResolver = new AutofacWebApiDependencyResolver(container);

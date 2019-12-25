@@ -14,4 +14,9 @@ namespace Student.Web.Models
         [DataMember(Name = "Data")]
         public T Data { get; set; }
     }
+
+    public class PostObject
+    {
+        public object PostData { get; set; }
+    }
 }

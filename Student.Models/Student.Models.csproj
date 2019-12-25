@@ -79,6 +79,8 @@
     <Compile Include="ApplicationUser.cs" />
     <Compile Include="IdentityConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisterModel.cs" />
+    <Compile Include="ServiceResponse.cs" />
     <Compile Include="Student.cs" />
     <Compile Include="Subject.cs" />
   </ItemGroup>

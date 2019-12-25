@@ -11,6 +11,7 @@ namespace Student.Repository
         {
             builder.RegisterType<StudentContext>().As<IStudentContext>().InstancePerLifetimeScope();
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(StudentDBRepo<>)).As(typeof(IStudentRepo<>)).InstancePerLifetimeScope();
         }
         public static void disposeMethod()
         {

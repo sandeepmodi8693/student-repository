@@ -80,6 +80,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\ISqlRepository.cs" />
+    <Compile Include="Implementations\SqlRepository.cs" />
     <Compile Include="RepositoryDependency.cs" />
     <Compile Include="Contracts\IDbContext.cs" />
     <Compile Include="Contracts\IUnitOfWork.cs" />

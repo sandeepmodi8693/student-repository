@@ -44,10 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\ISubjectCommandService.cs" />
-    <Compile Include="Contracts\ISubjectQueryService.cs" />
-    <Compile Include="Implementations\SubjectCommandService.cs" />
-    <Compile Include="Implementations\SubjectQueryService.cs" />
+    <Compile Include="Contracts\ICommandService.cs" />
+    <Compile Include="Contracts\IQueryService.cs" />
+    <Compile Include="Implementations\CommandService.cs" />
+    <Compile Include="Implementations\QueryService.cs" />
     <Compile Include="ServiceDependency.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

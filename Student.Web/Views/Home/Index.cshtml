@@ -1,45 +1,38 @@
-﻿@{
+﻿@model Student.Web.Models.LoginModel
+@{
     ViewData["Title"] = "Home Page";
 }
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#btnSubmit').click(function () {
-            $.ajax({
-                url: 'http://localhost:62566/token',
-                type: 'POST',
-                data: {
-                    username: $('#login').val(),
-                    password: $('#password').val(),
-                    grant_type: 'password'
-                },
-                success: function (data) {
-                    console.log(data);
-                }
-            });
-        });
-
-    });
-</script>
-<div class="text-center">
-    <div class="row">
-        <div class="col-6">
-            <table class="table">
-                <tr>
-                    <td>Username</td>
-                    <td><input type="text" id="login" class="fadeIn second" name="login" placeholder="login" value="test.student@gmail.com"></td>
-
-                </tr>
-                <tr>
-                    <td>Password</td>
-                    <td><input type="text" id="password" class="fadeIn second" name="login" placeholder="password" value="Secure*12"></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="button" id="btnSubmit" class="fadeIn fourth" value="Log In" />
-                    </td>
-                </tr>
+<div class="col-md-10 col-md-offset-1">
+    <form method="post">
+        <div class="well">
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="success">
+                        <td colspan="2">
+                            Login
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Email</td>
+                        <td>
+                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", id = "txtEmail", placeholder = "Email" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>
+                            @Html.PasswordFor(x => x.Password, new { @class = "form-control", id = "txtPassword", placeholder = "Password" })
+                        </td>
+                    </tr>
+                    <tr class="success">
+                        <td colspan="2">
+                            <input type="submit" id="btnSubmit" class="btn btn-success" value="Log In" />
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
-    </div>
+    </form>
 </div>
