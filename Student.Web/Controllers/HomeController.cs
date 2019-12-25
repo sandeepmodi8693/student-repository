@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Student.Web.Models;
 using Student.Web.Utility;
 
@@ -45,9 +46,25 @@ namespace Student.Web.Controllers
             return View();
         }
 
-        public IActionResult Student()
+        [HttpGet]
+        public async Task<IActionResult> Student()
         {
-            return View();
+            var students = await ApiHelper.GetAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudents");
+            return View(JsonConvert.DeserializeObject<List<StudentModel>>(JsonConvert.SerializeObject(students.Data)));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> StudentInfo(Guid studentId)
+        {
+            var students = await ApiHelper.GetAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudent?studentId=" + studentId);
+            return View(JsonConvert.DeserializeObject<StudentModel>(JsonConvert.SerializeObject(students.Data)));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Subject()
+        {
+            var students = await ApiHelper.GetAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudents");
+            return View(JsonConvert.DeserializeObject<List<StudentModel>>(JsonConvert.SerializeObject(students.Data)));
         }
     }
 }

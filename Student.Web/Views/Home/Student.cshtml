@@ -2,35 +2,42 @@
 @{
     ViewData["Title"] = "Students List";
 }
-<div class="col-md-10 col-md-offset-1">
-    <div class="well">
-        <table class="table table-bordered">
-            <thead>
-                <tr class="success">
-                    <td colspan="5">
-                        @ViewData["Title"]
-                    </td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Email</td>
-                    <td>Firstname</td>
-                    <td>Lastname</td>
-                    <td>Mobile</td>
-                    <td>Action</td>
-                </tr>
-                @foreach (var item in Model)
-                {
-                <tr>
-                    <td>@item.Email</td>
-                    <td>@item.FirstName</td>
-                    <td>@item.LastName</td>
-                    <td>@item.Mobile</td>
-                    <td>Action</td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+<h1>Subject</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Mobile</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Mobile)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "studentinfo", new {  studentId=item.StudentId  }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.StudentId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
