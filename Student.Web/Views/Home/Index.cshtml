@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnSubmit').click(function () {
+            $.ajax({
+                url: 'http://localhost:62566/token',
+                type: 'POST',
+                data: {
+                    username: $('#login').val(),
+                    password: $('#password').val(),
+                    grant_type: 'password'
+                },
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+        });
+
+    });
+</script>
+<div class="text-center">
+    <div class="row">
+        <div class="col-6">
+            <table class="table">
+                <tr>
+                    <td>Username</td>
+                    <td><input type="text" id="login" class="fadeIn second" name="login" placeholder="login" value="test.student@gmail.com"></td>
+
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td><input type="text" id="password" class="fadeIn second" name="login" placeholder="password" value="Secure*12"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="button" id="btnSubmit" class="fadeIn fourth" value="Log In" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
