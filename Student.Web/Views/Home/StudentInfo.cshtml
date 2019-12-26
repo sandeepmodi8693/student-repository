@@ -5,6 +5,13 @@
 
 <h1>Student Info</h1>
 <hr />
+@if (ViewBag.Success != null)
+{
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Success!</strong> @ViewBag.Success
+    </div>
+}
 <div class="row">
     <div class="col-md-4">
         <form asp-action="StudentInfo">
@@ -37,6 +44,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Student" asp-controller="Home">Back to List</a>
 </div>
 

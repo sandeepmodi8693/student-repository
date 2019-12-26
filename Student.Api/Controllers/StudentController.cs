@@ -16,9 +16,10 @@ namespace Student.Api.Controllers
             _commandService = commandService;
             _queryService = queryService;
         }
-        public StudentController() { }
-        #region Subject API's
 
+        public StudentController() { }
+        
+        #region Subject API's
         [HttpGet]
         public IHttpActionResult GetSubject(Guid subjectId)
         {
@@ -51,7 +52,6 @@ namespace Student.Api.Controllers
         #endregion
 
         #region Student API's
-
         [HttpGet]
         public IHttpActionResult GetStudent(Guid studentId)
         {

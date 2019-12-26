@@ -36,5 +36,33 @@ namespace Student.Web.Utility
                 }
             }
         }
+
+        public static async Task<T> PutAsync<T>(string url, PostObject model)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                string json = JsonConvert.SerializeObject(model.PostData);
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+                using (var response = await httpClient.PutAsJsonAsync(url, model.PostData))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<T>(apiResponse);
+                }
+            }
+        }
+
+        public static async Task<T> DeleteAsync<T>(string url)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.DeleteAsync(url))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<T>(apiResponse);
+                }
+            }
+        }
     }
 }
