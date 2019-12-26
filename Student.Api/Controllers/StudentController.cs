@@ -5,7 +5,7 @@ using System.Web.Http;
 
 namespace Student.Api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class StudentController : ApiController
     {
         private readonly ICommandService _commandService;

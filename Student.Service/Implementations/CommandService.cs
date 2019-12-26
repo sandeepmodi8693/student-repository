@@ -64,6 +64,9 @@ namespace Student.Service.Implementations
         {
             try
             {
+                model.CreatedDate = DateTime.UtcNow;
+                model.UpdatedDate = DateTime.UtcNow;
+                model.IsActive = true;
                 _student.Insert(model);
                 return new ServiceResponse() { IsSuccessful = true, Data = model };
             }

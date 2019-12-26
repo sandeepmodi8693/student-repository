@@ -37,7 +37,7 @@ namespace Student.Service.Implementations
         ServiceResponse IQueryService.GetStudent(Guid studentId)
         {
             var student = _student.Table.FirstOrDefault(x => x.StudentId.Equals(studentId));
-            if (!Guid.Empty.Equals(student.StudentId))
+            if (student != null)
                 return new ServiceResponse() { IsSuccessful = true, Data = student };
             else
                 return new ServiceResponse() { IsSuccessful = false };
