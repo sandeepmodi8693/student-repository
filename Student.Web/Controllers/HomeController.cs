@@ -21,25 +21,26 @@ namespace Student.Web.Controllers
         {
             Configuration = configuration;
         }
+
         [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Index(LoginModel model)
-        {
-            model.grant_type = "password";
-            var response = await ApiHelper.PostAsync<TokenResponse>(Configuration.GetSection("ApiBaseURL").Value + "token", string.Empty, new PostObject() { PostData = model });
-            if (!string.IsNullOrEmpty(response.userName) && !string.IsNullOrEmpty(response.access_token))
-            {
-                HttpContext.Session.SetString("UserName", response.userName);
-                HttpContext.Session.SetString("Token", response.access_token);
-                return RedirectToAction("Student");
-            }
-            return View();
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Index(LoginModel model)
+        //{
+        //    model.grant_type = "password";
+        //    var response = await ApiHelper.PostAsync<TokenResponse>(Configuration.GetSection("ApiBaseURL").Value + "token", string.Empty, new PostObject() { PostData = model });
+        //    if (!string.IsNullOrEmpty(response.userName) && !string.IsNullOrEmpty(response.access_token))
+        //    {
+        //        HttpContext.Session.SetString("UserName", response.userName);
+        //        HttpContext.Session.SetString("Token", response.access_token);
+        //        return RedirectToAction("Student");
+        //    }
+        //    return View();
+        //}
 
         [HttpGet]
         public IActionResult Logout()
