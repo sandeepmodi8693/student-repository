@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
@@ -10,6 +11,8 @@ using Student.Api.Results;
 using Student.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -25,16 +28,18 @@ namespace Student.Api.Controllers
     {
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
+        private ApplicationSignInManager _signInManager;
 
         public AccountController()
         {
         }
 
-        public AccountController(ApplicationUserManager userManager,
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager,
             ISecureDataFormat<AuthenticationTicket> accessTokenFormat)
         {
             UserManager = userManager;
             AccessTokenFormat = accessTokenFormat;
+            SignInManager = signInManager;
         }
 
         public ApplicationUserManager UserManager
@@ -46,6 +51,18 @@ namespace Student.Api.Controllers
             private set
             {
                 _userManager = value;
+            }
+        }
+
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? Request.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -161,7 +178,7 @@ namespace Student.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            
             Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
 
             AuthenticationTicket ticket = AccessTokenFormat.Unprotect(model.ExternalAccessToken);
@@ -220,6 +237,49 @@ namespace Student.Api.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
+        [HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
+        [HttpPost]
+        [Route("CustomExternalLogin")]
+        public async Task<IHttpActionResult> CustomExternalLogin(CustomExternalLoginInfo model)
+        {
+            ServiceResponse response = new ServiceResponse();
+            
+            var user = await UserManager.FindByEmailAsync(model.Email);
+            ClaimsIdentity claimsIdentity = await user.GenerateUserIdentityAsync(UserManager, "Google");
+            var info = new ExternalLoginInfo();
+            info.Email = model.Email;
+            info.Login = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
+            info.ExternalIdentity = claimsIdentity;
+            info.DefaultUserName = model.Email;
+            var result = await SignInManager.ExternalSignInAsync(info, isPersistent: false);
+            if(result==SignInStatus.Success)
+                response.IsSuccessful = true;
+            //bool hasRegistered = user != null;
+            //if (hasRegistered)
+            //{
+            //    Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+
+            //    ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager, CookieAuthenticationDefaults.AuthenticationType);
+            //    ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager, CookieAuthenticationDefaults.AuthenticationType);
+
+            //    AuthenticationProperties properties = ApplicationOAuthProvider.CreateProperties(user.UserName);
+            //    properties.IsPersistent = false;
+            //    //var result= await SignInManager.ExternalSignInAsync(info, isPersistent: false);
+            //    response.IsSuccessful = true;
+            //}
+            //else
+            //{
+            //    IEnumerable<Claim> claims = claimsIdentity.Claims;
+            //    ClaimsIdentity identity = new ClaimsIdentity(claims, OAuthDefaults.AuthenticationType);
+            //    Authentication.SignIn(identity);
+            //    response.IsSuccessful = true;
+            //}
+            //var temp = HttpContext.Current.User.Identity.GetUserId();
+            
+            return Ok(response);
+        }
+
         // GET api/Account/ExternalLogin
         [OverrideAuthentication]
         [HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
@@ -276,6 +336,7 @@ namespace Student.Api.Controllers
 
             return Ok();
         }
+
 
         // GET api/Account/ExternalLogins?returnUrl=%2F&generateState=true
         [AllowAnonymous]
@@ -341,20 +402,45 @@ namespace Student.Api.Controllers
             return Ok();
         }
 
+
+
+        [AllowAnonymous]
+        [Route("RegisterExternalUser")]
+        public async Task<IHttpActionResult> RegisterExternalUser(RegisterExternalUserModel model)
+        {
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+
+            IdentityResult result = await UserManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+            UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
+            result = await UserManager.AddLoginAsync(user.Id, loginInfo);
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+            return Ok();
+        }
+
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]
         [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
         [Route("RegisterExternal")]
         public async Task<IHttpActionResult> RegisterExternal(RegisterExternalBindingModel model)
         {
+            ServiceResponse response = new ServiceResponse();
             if (!ModelState.IsValid)
             {
+                response.IsSuccessful = false;
                 return BadRequest(ModelState);
             }
 
             var info = await Authentication.GetExternalLoginInfoAsync();
             if (info == null)
             {
+                response.IsSuccessful = false;
                 return InternalServerError();
             }
 
@@ -363,15 +449,23 @@ namespace Student.Api.Controllers
             IdentityResult result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)
             {
+                response.IsSuccessful = false;
                 return GetErrorResult(result);
             }
-
+            
             result = await UserManager.AddLoginAsync(user.Id, info.Login);
             if (!result.Succeeded)
             {
+                response.IsSuccessful = false;
                 return GetErrorResult(result); 
             }
-            return Ok();
+            else
+            {
+                response.IsSuccessful = true;
+                await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+            }
+            response.IsSuccessful = true;
+            return Ok(response);
         }
 
         protected override void Dispose(bool disposing)

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Student.Web.Models;
 using Student.Web.Utility;
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -80,7 +81,7 @@ namespace Student.Web.Controllers
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");
                     return RedirectToLocal(returnUrl);
@@ -126,26 +127,25 @@ namespace Student.Web.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            CustomExternalLoginInfo customExternalLoginInfo = new CustomExternalLoginInfo()
+            {
+                ProviderKey = info.ProviderKey,
+                LoginProvider = info.LoginProvider,
+                Email = email
+            };
+            var response = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/CustomExternalLogin", string.Empty, new PostObject() { PostData = customExternalLoginInfo });
 
-            // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (result.Succeeded)
+            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["LoginProvider"] = info.LoginProvider;
+            if (response.IsSuccessful)
             {
-                _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
-                return RedirectToLocal(returnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                return RedirectToAction(nameof(Lockout));
+                HttpContext.Session.SetString("UserName", email);
+                HttpContext.Session.SetString("Token", "Google");
+                return RedirectToAction("Student", "Home");
             }
             else
-            {
-                // If the user does not have an account, then ask the user to create an account.
-                ViewData["ReturnUrl"] = returnUrl;
-                ViewData["LoginProvider"] = info.LoginProvider;
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
-            }
+                return RedirectToAction("Login", "Account");
         }
 
         [HttpPost]
@@ -163,15 +163,17 @@ namespace Student.Web.Controllers
                 }
 
                 var identifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-                var picture = $"https://graph.facebook.com/{identifier}/picture?type=large";
-
-                
 
                 var user = new User { UserName = model.Email, Email = model.Email, FirstName = model.Email };
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+
+
+                model.LoginProvider = info.LoginProvider;
+                model.ProviderKey = info.ProviderKey;
+                var response = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/RegisterExternalUser", string.Empty, new PostObject() { PostData = model });
+
+                if (response.IsSuccessful)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
+                    var result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
@@ -179,7 +181,7 @@ namespace Student.Web.Controllers
                         return RedirectToLocal(returnUrl);
                     }
                 }
-                AddErrors(result);
+                //AddErrors(result);
             }
 
             ViewData["ReturnUrl"] = returnUrl;

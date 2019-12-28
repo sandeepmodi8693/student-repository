@@ -13,8 +13,11 @@ namespace Student.Web.Utility
         {
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                if (!string.IsNullOrEmpty(token) && token != "Google")
+                {
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                }
                 using (var response = await httpClient.GetAsync(url))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
@@ -31,7 +34,7 @@ namespace Student.Web.Utility
             {
                 var formContent = new FormUrlEncodedContent(JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(model.PostData)));
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                if(!string.IsNullOrEmpty(token))
+                if (!string.IsNullOrEmpty(token) && token != "Google")
                     httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
                 using (var response = await httpClient.PostAsync(url, formContent))
@@ -48,7 +51,7 @@ namespace Student.Web.Utility
             {
                 var formContent = new FormUrlEncodedContent(JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(model.PostData)));
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                if (!string.IsNullOrEmpty(token))
+                if (!string.IsNullOrEmpty(token) && token != "Google")
                     httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
                 using (var response = await httpClient.PutAsync(url, formContent))
@@ -64,7 +67,7 @@ namespace Student.Web.Utility
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                if (!string.IsNullOrEmpty(token))
+                if (!string.IsNullOrEmpty(token) && token != "Google")
                     httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 using (var response = await httpClient.DeleteAsync(url))
                 {

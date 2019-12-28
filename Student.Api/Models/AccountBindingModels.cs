@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNet.Identity.Owin;
 using Newtonsoft.Json;
 
 namespace Student.Api.Models
@@ -55,6 +56,15 @@ namespace Student.Api.Models
         [Required]
         [Display(Name = "Email")]
         public string Email { get; set; }
+    }
+
+    public class RegisterExternalUserModel
+    {
+        [Required]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+        public string LoginProvider { get; set; }
+        public string ProviderKey { get; set; }
     }
 
     public class RemoveLoginBindingModel

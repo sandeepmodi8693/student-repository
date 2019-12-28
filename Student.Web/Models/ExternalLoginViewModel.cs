@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Student.Web.Models
 {
@@ -9,5 +10,16 @@ namespace Student.Web.Models
         public string Email { get; set; }
 
         public string Name { get; set; }
+
+        public string LoginProvider { get; set; }
+
+        public string ProviderKey { get; set; }
+    }
+
+    public class CustomExternalLoginInfo
+    {
+        public string LoginProvider { get; set; }
+        public string Email { get; set; }
+        public string ProviderKey { get; set; }
     }
 }
