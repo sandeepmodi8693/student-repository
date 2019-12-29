@@ -2,9 +2,13 @@
 
 namespace Student.Web.Models
 {
-    public class ServiceResponse
+    public class BaseServiceResponse
     {
         public bool IsSuccessful { get; set; }
-        public object Data { get; set; }
+    }
+
+    public class ServiceResponse<T> : BaseServiceResponse
+    {
+        public T Data { get; set; }
     }
 }

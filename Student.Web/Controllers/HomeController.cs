@@ -66,8 +66,8 @@ namespace Student.Web.Controllers
         {
             if (HttpContext.Session.Get("Token") == null)
                 return RedirectToAction("Index");
-            var students = await ApiHelper.GetAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudents", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
-            return View(JsonConvert.DeserializeObject<List<StudentModel>>(JsonConvert.SerializeObject(students.Data)));
+            var students = await ApiHelper.GetAsync<ServiceResponse<List<StudentModel>>>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudents", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
+            return View(students.Data);
         }
 
         [HttpGet]
@@ -75,8 +75,8 @@ namespace Student.Web.Controllers
         {
             if (HttpContext.Session.Get("Token") == null)
                 return RedirectToAction("Index");
-            var students = await ApiHelper.GetAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudent?studentId=" + studentId, System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
-            return View(JsonConvert.DeserializeObject<StudentModel>(JsonConvert.SerializeObject(students.Data)));
+            var students = await ApiHelper.GetAsync<ServiceResponse<StudentModel>>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/GetStudent?studentId=" + studentId, System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
+            return View(students.Data);
         }
 
         [HttpPost]
@@ -86,12 +86,12 @@ namespace Student.Web.Controllers
                 return RedirectToAction("Index");
             if (model.StudentId == Guid.Empty)
             {
-                var students = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/AddStudent", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")), new PostObject() { PostData = model });
+                var students = await ApiHelper.PostAsync<BaseServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/AddStudent", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")), new PostObject() { PostData = model });
                 return RedirectToAction("Student");
             }
             else
             {
-                var students = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/UpdateStudent", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")), new PostObject() { PostData = model });
+                var students = await ApiHelper.PostAsync<BaseServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/UpdateStudent", System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")), new PostObject() { PostData = model });
                 return RedirectToAction("Student");
             }
         }
@@ -101,7 +101,7 @@ namespace Student.Web.Controllers
         {
             if (HttpContext.Session.Get("Token") == null)
                 return RedirectToAction("Index");
-            var students = await ApiHelper.DeleteAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/DeleteStudent?studentId=" + studentId, System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
+            var students = await ApiHelper.DeleteAsync<BaseServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Student/DeleteStudent?studentId=" + studentId, System.Text.Encoding.UTF8.GetString(HttpContext.Session.Get("Token")));
             return RedirectToAction("Student");
         }
     }

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
+using Newtonsoft.Json.Linq;
 using Student.Api.Models;
 using Student.Api.Providers;
 using Student.Api.Results;
@@ -12,7 +12,6 @@ using Student.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -142,7 +141,7 @@ namespace Student.Api.Controllers
 
             IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
                 model.NewPassword);
-            
+
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
@@ -178,7 +177,7 @@ namespace Student.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
 
             AuthenticationTicket ticket = AccessTokenFormat.Unprotect(model.ExternalAccessToken);
@@ -244,7 +243,7 @@ namespace Student.Api.Controllers
         public async Task<IHttpActionResult> CustomExternalLogin(CustomExternalLoginInfo model)
         {
             ServiceResponse response = new ServiceResponse();
-            
+
             var user = await UserManager.FindByEmailAsync(model.Email);
             ClaimsIdentity claimsIdentity = await user.GenerateUserIdentityAsync(UserManager, "Google");
             var info = new ExternalLoginInfo();
@@ -253,7 +252,7 @@ namespace Student.Api.Controllers
             info.ExternalIdentity = claimsIdentity;
             info.DefaultUserName = model.Email;
             var result = await SignInManager.ExternalSignInAsync(info, isPersistent: false);
-            if(result==SignInStatus.Success)
+            if (result == SignInStatus.Success)
                 response.IsSuccessful = true;
             //bool hasRegistered = user != null;
             //if (hasRegistered)
@@ -276,7 +275,7 @@ namespace Student.Api.Controllers
             //    response.IsSuccessful = true;
             //}
             //var temp = HttpContext.Current.User.Identity.GetUserId();
-            
+
             return Ok(response);
         }
 
@@ -318,9 +317,9 @@ namespace Student.Api.Controllers
             if (hasRegistered)
             {
                 Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-                
-                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
-                    OAuthDefaults.AuthenticationType);
+
+                ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
+                   OAuthDefaults.AuthenticationType);
                 ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager,
                     CookieAuthenticationDefaults.AuthenticationType);
 
@@ -393,35 +392,103 @@ namespace Student.Api.Controllers
             var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            ServiceResponse serviceResponse = new ServiceResponse();
 
             if (!result.Succeeded)
             {
-                return GetErrorResult(result);
+                serviceResponse.IsSuccessful = false;
+                serviceResponse.Data = new TokenResponse() { userName = result.Errors.First().ToString() };
+                return Ok(serviceResponse);
             }
+            ClaimsIdentity oAuthIdentity = new ClaimsIdentity(Startup.OAuthOptions.AuthenticationType);
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
+            AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, new AuthenticationProperties());
+            DateTime currentUtc = DateTime.UtcNow;
+            ticket.Properties.IssuedUtc = currentUtc;
+            ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromDays(365));
+            string accessToken = Startup.OAuthOptions.AccessTokenFormat.Protect(ticket);
+            Request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            TokenResponse token = new TokenResponse()
+            {
+                access_token = accessToken,
+                token_type = "bearer",
+                expires = currentUtc.Add(TimeSpan.FromDays(365)).ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
+                issued = currentUtc.ToString("ddd, dd MMM yyyy HH':'mm':'ss 'GMT'"),
+                expires_in = TimeSpan.FromDays(365).TotalSeconds.ToString(),
+                userName = user.UserName,
+                userId = user.Id
 
-            return Ok();
+            };
+            serviceResponse.Data = token;
+            serviceResponse.IsSuccessful = true;
+            return Ok(serviceResponse);
         }
 
 
 
-        [AllowAnonymous]
-        [Route("RegisterExternalUser")]
-        public async Task<IHttpActionResult> RegisterExternalUser(RegisterExternalUserModel model)
-        {
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+        //[AllowAnonymous]
+        //[Route("RegisterExternalUser")]
+        //public async Task<IHttpActionResult> RegisterExternalUser(RegisterExternalUserModel model)
+        //{
+        //    var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
-            IdentityResult result = await UserManager.CreateAsync(user);
-            if (!result.Succeeded)
+        //    IdentityResult result = await UserManager.CreateAsync(user);
+        //    if (!result.Succeeded)
+        //    {
+        //        return GetErrorResult(result);
+        //    }
+        //    UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
+        //    result = await UserManager.AddLoginAsync(user.Id, loginInfo);
+        //    if (!result.Succeeded)
+        //    {
+        //        return GetErrorResult(result);
+        //    }
+        //    return Ok();
+        //}
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("GetAccessToken")]
+        public async Task<IHttpActionResult> GetAccessToken(RegisterExternalUserModel model)
+        {
+            var user = UserManager.FindByEmail(model.Email);
+            if (user == null)
             {
-                return GetErrorResult(result);
+                user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+                await UserManager.CreateAsync(user);
+                if (!string.IsNullOrEmpty(model.LoginProvider) && !string.IsNullOrEmpty(model.ProviderKey))
+                {
+                    UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
+                    await UserManager.AddLoginAsync(user.Id, loginInfo);
+                }
             }
-            UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
-            result = await UserManager.AddLoginAsync(user.Id, loginInfo);
-            if (!result.Succeeded)
+            ClaimsIdentity oAuthIdentity = new ClaimsIdentity(Startup.OAuthOptions.AuthenticationType);
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
+            AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, new AuthenticationProperties());
+            DateTime currentUtc = DateTime.UtcNow;
+            ticket.Properties.IssuedUtc = currentUtc;
+            ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromDays(365));
+            string accessToken = Startup.OAuthOptions.AccessTokenFormat.Protect(ticket);
+            Request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            TokenResponse token = new TokenResponse()
             {
-                return GetErrorResult(result);
-            }
-            return Ok();
+                access_token = accessToken,
+                token_type = "bearer",
+                expires = currentUtc.Add(TimeSpan.FromDays(365)).ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
+                issued = currentUtc.ToString("ddd, dd MMM yyyy HH':'mm':'ss 'GMT'"),
+                expires_in = TimeSpan.FromDays(365).TotalSeconds.ToString(),
+                userName = user.UserName,
+                userId = user.Id
+
+            };
+            ServiceResponse serviceResponse = new ServiceResponse()
+            {
+                Data = token,
+                IsSuccessful = true
+            };
+            return Ok(serviceResponse);
         }
 
         // POST api/Account/RegisterExternal
@@ -452,12 +519,12 @@ namespace Student.Api.Controllers
                 response.IsSuccessful = false;
                 return GetErrorResult(result);
             }
-            
+
             result = await UserManager.AddLoginAsync(user.Id, info.Login);
             if (!result.Succeeded)
             {
                 response.IsSuccessful = false;
-                return GetErrorResult(result); 
+                return GetErrorResult(result);
             }
             else
             {

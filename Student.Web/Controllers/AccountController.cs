@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 
 namespace Student.Web.Controllers
 {
-    [Authorize]
     [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
@@ -40,6 +39,7 @@ namespace Student.Web.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
@@ -48,10 +48,9 @@ namespace Student.Web.Controllers
             if (!string.IsNullOrEmpty(response.userName) && !string.IsNullOrEmpty(response.access_token))
             {
                 User user = new User() { Email = response.userName, UserName = response.userName };
-                await _signInManager.SignInAsync(user, isPersistent: false);
                 HttpContext.Session.SetString("UserName", response.userName);
                 HttpContext.Session.SetString("Token", response.access_token);
-                return RedirectToAction("Student");
+                return RedirectToAction("Student","Home");
             }
             return View();
         }
@@ -73,30 +72,26 @@ namespace Student.Web.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new User { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName };
-
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
+                var response = await ApiHelper.PostAsync<ServiceResponse<TokenResponse>>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/Register", string.Empty, new PostObject() { PostData = model });
+                if (response.IsSuccessful)
                 {
-                    _logger.LogInformation("User created a new account with password.");
-
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
+                    HttpContext.Session.SetString("UserName", response.Data.userName);
+                    HttpContext.Session.SetString("Token", response.Data.access_token);
+                    return RedirectToAction("Student", "Home");
                 }
-                AddErrors(result);
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Something went wrong!");
+                }
             }
-
             // If we got this far, something failed, redisplay form
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear();
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             return RedirectToAction("Login", "Account");
@@ -134,90 +129,82 @@ namespace Student.Web.Controllers
                 LoginProvider = info.LoginProvider,
                 Email = email
             };
-            var response = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/CustomExternalLogin", string.Empty, new PostObject() { PostData = customExternalLoginInfo });
+            var response = await ApiHelper.PostAsync<ServiceResponse<TokenResponse>>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/GetAccessToken", string.Empty, new PostObject() { PostData = customExternalLoginInfo });
 
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["LoginProvider"] = info.LoginProvider;
             if (response.IsSuccessful)
             {
                 HttpContext.Session.SetString("UserName", email);
-                HttpContext.Session.SetString("Token", "Google");
+                HttpContext.Session.SetString("Token", response.Data.access_token);
                 return RedirectToAction("Student", "Home");
             }
             else
                 return RedirectToAction("Login", "Account");
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
-        {
-            if (ModelState.IsValid)
-            {
-                // Get the information about the user from the external login provider
-                var info = await _signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    throw new ApplicationException("Error loading external login information during confirmation.");
-                }
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Get the information about the user from the external login provider
+        //        var info = await _signInManager.GetExternalLoginInfoAsync();
+        //        if (info == null)
+        //        {
+        //            throw new ApplicationException("Error loading external login information during confirmation.");
+        //        }
 
-                var identifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        var identifier = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        var user = new User { UserName = model.Email, Email = model.Email, FirstName = model.Email };
+        //        model.LoginProvider = info.LoginProvider;
+        //        model.ProviderKey = info.ProviderKey;
+        //        var response = await ApiHelper.PostAsync<ServiceResponse<TokenResponse>>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/GetAccessToken", string.Empty, new PostObject() { PostData = model });
 
-                var user = new User { UserName = model.Email, Email = model.Email, FirstName = model.Email };
+        //        if (response.IsSuccessful)
+        //        {
+        //            HttpContext.Session.SetString("UserName", response.Data.userName);
+        //            HttpContext.Session.SetString("Token", response.Data.access_token);
+        //            return RedirectToAction("Student", "Home");
+        //        }
+        //    }
 
+        //    ViewData["ReturnUrl"] = returnUrl;
+        //    return View(nameof(ExternalLogin), model);
+        //}
 
-                model.LoginProvider = info.LoginProvider;
-                model.ProviderKey = info.ProviderKey;
-                var response = await ApiHelper.PostAsync<ServiceResponse>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/RegisterExternalUser", string.Empty, new PostObject() { PostData = model });
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        //{
+        //    if (userId == null || code == null)
+        //    {
+        //        return RedirectToAction("Login", "Account");
+        //    }
+        //    var user = await _userManager.FindByIdAsync(userId);
+        //    if (user == null)
+        //    {
+        //        throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+        //    }
+        //    var result = await _userManager.ConfirmEmailAsync(user, code);
+        //    return View(result.Succeeded ? "ConfirmEmail" : "Error");
+        //}
 
-                if (response.IsSuccessful)
-                {
-                    var result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-                        return RedirectToLocal(returnUrl);
-                    }
-                }
-                //AddErrors(result);
-            }
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public IActionResult ResetPasswordConfirmation()
+        //{
+        //    return View();
+        //}
 
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(nameof(ExternalLogin), model);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            if (userId == null || code == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
-            }
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult ResetPasswordConfirmation()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Lockout()
-        {
-            return View();
-        }
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public IActionResult Lockout()
+        //{
+        //    return View();
+        //}
 
         [HttpGet]
         public IActionResult AccessDenied()
