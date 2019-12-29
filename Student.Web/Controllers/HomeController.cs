@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Student.Web.Models;
 using Student.Web.Utility;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Student.Web.Controllers
 {
@@ -24,39 +19,6 @@ namespace Student.Web.Controllers
 
         [HttpGet]
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        //[HttpPost]
-        //public async Task<IActionResult> Index(LoginModel model)
-        //{
-        //    model.grant_type = "password";
-        //    var response = await ApiHelper.PostAsync<TokenResponse>(Configuration.GetSection("ApiBaseURL").Value + "token", string.Empty, new PostObject() { PostData = model });
-        //    if (!string.IsNullOrEmpty(response.userName) && !string.IsNullOrEmpty(response.access_token))
-        //    {
-        //        HttpContext.Session.SetString("UserName", response.userName);
-        //        HttpContext.Session.SetString("Token", response.access_token);
-        //        return RedirectToAction("Student");
-        //    }
-        //    return View();
-        //}
-
-        [HttpGet]
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Register(RegisterModel model)
         {
             return View();
         }

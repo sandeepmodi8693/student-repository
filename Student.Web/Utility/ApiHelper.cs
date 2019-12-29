@@ -26,8 +26,6 @@ namespace Student.Web.Utility
             }
         }
 
-
-
         public static async Task<T> PostAsync<T>(string url, string token, PostObject model)
         {
             using (var httpClient = new HttpClient())

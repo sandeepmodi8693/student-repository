@@ -13,8 +13,7 @@ namespace Student.Web.Models
 
     public class StudentDbContext : IdentityDbContext<User>
     {
-        public StudentDbContext(DbContextOptions<StudentDbContext> options)
-            : base(options)
+        public StudentDbContext(DbContextOptions<StudentDbContext> options) : base(options)
         {
         }
     }
