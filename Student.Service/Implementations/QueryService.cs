@@ -14,7 +14,7 @@ namespace Student.Service.Implementations
             _student = student;
         }
 
-        ServiceResponse IQueryService.GetStudent(Guid studentId)
+        public ServiceResponse GetStudent(Guid studentId)
         {
             var student = _student.Table.FirstOrDefault(x => x.StudentId.Equals(studentId));
             if (student != null)
@@ -22,8 +22,8 @@ namespace Student.Service.Implementations
             else
                 return new ServiceResponse() { IsSuccessful = false };
         }
-
-        ServiceResponse IQueryService.GetStudents()
+        
+        public ServiceResponse GetStudents()
         {
             var student = _student.Table.Where(x => x.IsActive.Equals(true)).ToList();
             if (student.Count > 0)
