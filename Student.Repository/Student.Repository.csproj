@@ -84,9 +84,7 @@
     <Compile Include="Implementations\SqlRepository.cs" />
     <Compile Include="RepositoryDependency.cs" />
     <Compile Include="Contracts\IDbContext.cs" />
-    <Compile Include="Contracts\IUnitOfWork.cs" />
     <Compile Include="Database\StudentContext.cs" />
-    <Compile Include="Implementations\UnitOfWork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,7 +30,6 @@ namespace Student.Repository.Database
             return new StudentContext();
         }
         public DbSet<Models.Student> Students { get; set; }
-        public DbSet<Subject> Subjects { get; set; }
     }
 
     public class InitialMigration : CreateDatabaseIfNotExists<StudentContext>
@@ -53,8 +52,8 @@ namespace Student.Repository.Database
             if (!userManager.Users.Any())
             {
                 List<Tuple<string, string, string>> UserInfo = new List<Tuple<string, string, string>>();
-                UserInfo.Add(new Tuple<string, string, string>("test.student@gmail.com", "Student", "Secure*12"));
-                UserInfo.Add(new Tuple<string, string, string>("test.teacher@gmail.com", "Teacher", "Secure*12"));
+                UserInfo.Add(new Tuple<string, string, string>("test.student@example.com", "Student", "Secure*12"));
+                UserInfo.Add(new Tuple<string, string, string>("test.teacher@example.com", "Teacher", "Secure*12"));
                 foreach (var userDetail in UserInfo)
                 {
                     var user = new ApplicationUser
@@ -65,6 +64,18 @@ namespace Student.Repository.Database
                     userManager.Create(user, userDetail.Item3);
                     userManager.AddToRole(user.Id, userDetail.Item2);
                 }
+            }
+            if (!context.Students.Any())
+            {
+                var students = new List<Models.Student>()
+                {
+                    new Models.Student(){ Email="test1@example.com", FirstName="Test1", LastName="Test1", Mobile=12345, IsActive=true, CreatedDate=DateTime.UtcNow, UpdatedDate=DateTime.UtcNow },
+                    new Models.Student(){ Email="test2@example.com", FirstName="Test2", LastName="Test2", Mobile=12345, IsActive=true, CreatedDate=DateTime.UtcNow, UpdatedDate=DateTime.UtcNow },
+                    new Models.Student(){ Email="test3@example.com", FirstName="Test3", LastName="Test3", Mobile=12345, IsActive=true, CreatedDate=DateTime.UtcNow, UpdatedDate=DateTime.UtcNow },
+                    new Models.Student(){ Email="test4@example.com", FirstName="Test4", LastName="Test4", Mobile=12345, IsActive=true, CreatedDate=DateTime.UtcNow, UpdatedDate=DateTime.UtcNow },
+                    new Models.Student(){ Email="test5@example.com", FirstName="Test5", LastName="Test5", Mobile=12345, IsActive=true, CreatedDate=DateTime.UtcNow, UpdatedDate=DateTime.UtcNow },
+                };
+                context.Students.AddRange(students);
             }
             base.Seed(context);
         }

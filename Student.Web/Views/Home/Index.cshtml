@@ -1,64 +1,10 @@
-﻿@model Student.Web.Models.LoginModel
-@{
-    ViewData["Title"] = "Home Page";
+﻿@{
+    ViewData["Title"] = "Home";
 }
 <script src="~/lib/jquery/dist/jquery.js"></script>
-<div class="col-md-10 col-md-offset-1">
-    <form method="post">
-        <div class="well">
-            <table class="table table-bordered">
-                <thead>
-                    <tr class="success">
-                        <td colspan="2">
-                            Login
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Email</td>
-                        <td>
-                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", id = "txtEmail", placeholder = "Email" })
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Password</td>
-                        <td>
-                            @Html.PasswordFor(x => x.Password, new { @class = "form-control", id = "txtPassword", placeholder = "Password" })
-                        </td>
-                    </tr>
-                    <tr class="success">
-                        <td colspan="2">
-                            <input type="submit" id="btnSubmit" class="btn btn-success" value="Log In" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="well">
-            <table class="table table-bordered">
-                <thead>
-                    <tr class="success">
-                        <td colspan="2">
-                            Social Login
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="success">
-                        <td colspan="2">
-                            <input type="button" id="btnGoogleLogin" class="btn btn-success" value="Login with Google" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </form>
+<div class="col-md-12">
+    <div class="text-center" style="padding-top:150px;">
+        <h2>Welcome to student portal!</h2>
+        <p>Please <a href="Account/Login">click here</a> to login.</p>
+    </div>
 </div>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#btnGoogleLogin').click(function () {
-            window.location ='Home/Login?provider=Google&response_type=token&client_id=self&returnUrl=https%3A%2F%2Flocalhost%3A44377%2FHome&state=Rkunuvx3gxnXzLK9NOMyrFOokurSM4f67AEb12QJpXI1'
-        });
-    });
-</script>

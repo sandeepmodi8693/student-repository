@@ -1,0 +1,83 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http.Authentication
+@model Student.Web.Models.LoginModel
+@inject SignInManager<User> SignInManager
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="col-md-10 col-md-offset-1">
+    <form method="post" asp-action="Login" asp-controller="Account">
+        <div class="well">
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="success">
+                        <td colspan="2">
+                            Login
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Email</td>
+                        <td>
+                            <input asp-for="UserName" class="form-control" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>
+                            <input asp-for="Password" class="form-control" type="password" />
+                        </td>
+                    </tr>
+                    <tr class="success">
+                        <td colspan="2">
+                            <button type="submit" class="btn btn-primary" value="Log In" title="Log in">Log In</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger alert-dismissible">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Error! </strong>@ViewBag.ErrorMessage
+                </div>
+            }
+        </div>
+</form>
+<div class="well">
+    @{
+        var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        if (loginProviders.Count > 0)
+        {
+            <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="success">
+                            <td colspan="2">
+                                Social Login
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="success">
+                            <td colspan="2">
+                                <div>
+                                    <p>
+                                        @foreach (var provider in loginProviders)
+                                        {
+                                            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.Name</button>
+                                        }
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        }
+    }
+</div>
+</div>

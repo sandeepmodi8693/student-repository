@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Student.Api.Models
 {
@@ -38,6 +37,13 @@ namespace Student.Api.Models
     {
         public string LoginProvider { get; set; }
 
+        public string ProviderKey { get; set; }
+    }
+
+    public class CustomExternalLoginInfo
+    {
+        public string LoginProvider { get; set; }
+        public string Email { get; set; }
         public string ProviderKey { get; set; }
     }
 }

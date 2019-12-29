@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 
 namespace Student.Api.Models
 {
-    // Models used as parameters to AccountController actions.
-
     public class AddExternalLoginBindingModel
     {
         [Required]
@@ -55,6 +52,15 @@ namespace Student.Api.Models
         [Required]
         [Display(Name = "Email")]
         public string Email { get; set; }
+    }
+
+    public class RegisterExternalUserModel
+    {
+        [Required]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+        public string LoginProvider { get; set; }
+        public string ProviderKey { get; set; }
     }
 
     public class RemoveLoginBindingModel
