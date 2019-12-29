@@ -20,9 +20,9 @@ namespace Student.Repository.Implementations
         {
             this.context = context;
             this.dbSetTEntity = this.context.Set<TEntity>();
-#if DEBUG
-            //this.context.Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
-#endif
+            #if DEBUG
+                        //this.context.Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            #endif
         }
         
         public virtual void Update(TEntity entity)

@@ -47,6 +47,10 @@ namespace Student.Web.Controllers
                 HttpContext.Session.SetString("Token", response.access_token);
                 return RedirectToAction("Student","Home");
             }
+            else
+            {
+                ViewBag.ErrorMessage = "Invalid username or password.";
+            }
             return View();
         }
 

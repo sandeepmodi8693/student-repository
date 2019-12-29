@@ -38,39 +38,46 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </form>
-    <div class="well">
-        @{
-            var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (loginProviders.Count > 0)
+            @if (ViewBag.ErrorMessage != null)
             {
-                <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr class="success">
-                                <td colspan="2">
-                                    Social Login
-                                </td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="success">
-                                <td colspan="2">
-                                    <div>
-                                        <p>
-                                            @foreach (var provider in loginProviders)
-                                            {
-                                                <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.Name</button>
-                                            }
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+                <div class="alert alert-danger alert-dismissible">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Error! </strong>@ViewBag.ErrorMessage
+                </div>
             }
+        </div>
+</form>
+<div class="well">
+    @{
+        var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        if (loginProviders.Count > 0)
+        {
+            <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="success">
+                            <td colspan="2">
+                                Social Login
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="success">
+                            <td colspan="2">
+                                <div>
+                                    <p>
+                                        @foreach (var provider in loginProviders)
+                                        {
+                                            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.Name</button>
+                                        }
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
         }
-    </div>
+    }
+</div>
 </div>

@@ -24,13 +24,11 @@ namespace Student.Models
         }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string City { get; set; }
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext()
-            : base(ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString(), throwIfV1Schema: false)
+        public ApplicationDbContext() : base(ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString(), throwIfV1Schema: false)
         {
         }
 

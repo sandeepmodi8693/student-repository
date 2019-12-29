@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.Identity.Owin;
-using Newtonsoft.Json;
 
 namespace Student.Api.Models
 {
-    // Models used as parameters to AccountController actions.
-
     public class AddExternalLoginBindingModel
     {
         [Required]

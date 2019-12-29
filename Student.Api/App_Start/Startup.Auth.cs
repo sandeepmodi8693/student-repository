@@ -8,6 +8,7 @@ using Owin;
 using Student.Api.Providers;
 using Student.Models;
 using System;
+using System.Configuration;
 
 namespace Student.Api
 {
@@ -42,7 +43,7 @@ namespace Student.Api
             });
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
-            
+
 
             // Configure the application for OAuth based flow
             PublicClientId = "self";
@@ -74,10 +75,9 @@ namespace Student.Api
 
             app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             {
-                ClientId = "145770936429-fkpqt09cmtpmasqlp5sqm8humpbeepbl.apps.googleusercontent.com",
-                ClientSecret = "dh1FXK_A8yY9Kv-dYns-Ri9S"
+                ClientId = ConfigurationManager.AppSettings["GoogleClientId"].ToString(),
+                ClientSecret = ConfigurationManager.AppSettings["GoogleClientSecret"].ToString()
             });
-
         }
     }
 }

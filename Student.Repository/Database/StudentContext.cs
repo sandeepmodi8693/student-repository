@@ -30,7 +30,6 @@ namespace Student.Repository.Database
             return new StudentContext();
         }
         public DbSet<Models.Student> Students { get; set; }
-        public DbSet<Subject> Subjects { get; set; }
     }
 
     public class InitialMigration : CreateDatabaseIfNotExists<StudentContext>
