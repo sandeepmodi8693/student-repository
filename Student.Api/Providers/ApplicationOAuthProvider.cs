@@ -92,4 +92,9 @@ namespace Student.Api.Providers
             return new AuthenticationProperties(data);
         }
     }
+
+    public static class AppConstants
+    {
+        public const string TokenRequest = "fajjjsdfnn-sdfajk-fhasdfjkjkfk";
+    }
 }

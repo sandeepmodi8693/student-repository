@@ -45,7 +45,7 @@ namespace Student.Web.Controllers
                 User user = new User() { Email = response.userName, UserName = response.userName };
                 HttpContext.Session.SetString("UserName", response.userName);
                 HttpContext.Session.SetString("Token", response.access_token);
-                return RedirectToAction("Student","Home");
+                return RedirectToAction("Student", "Home");
             }
             else
             {
@@ -117,7 +117,8 @@ namespace Student.Web.Controllers
             {
                 ProviderKey = info.ProviderKey,
                 LoginProvider = info.LoginProvider,
-                Email = email
+                Email = email,
+                Key = "fajjjsdfnn-sdfajk-fhasdfjkjkfk"
             };
             var response = await ApiHelper.PostAsync<ServiceResponse<TokenResponse>>(Configuration.GetSection("ApiBaseURL").Value + "api/Account/GetAccessToken", string.Empty, new PostObject() { PostData = customExternalLoginInfo });
             ViewData["ReturnUrl"] = returnUrl;

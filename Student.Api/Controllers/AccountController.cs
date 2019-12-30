@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Student.Api.Models;
+using Student.Api.Providers;
 using Student.Models;
 using System;
 using System.Linq;
@@ -106,43 +107,56 @@ namespace Student.Api.Controllers
         [Route("GetAccessToken")]
         public async Task<IHttpActionResult> GetAccessToken(RegisterExternalUserModel model)
         {
-            var user = UserManager.FindByEmail(model.Email);
-            if (user == null)
+            if (model.Key.Equals(AppConstants.TokenRequest))
             {
-                user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
-                await UserManager.CreateAsync(user);
-                if (!string.IsNullOrEmpty(model.LoginProvider) && !string.IsNullOrEmpty(model.ProviderKey))
+                var user = UserManager.FindByEmail(model.Email);
+                if (user == null)
                 {
-                    UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
-                    await UserManager.AddLoginAsync(user.Id, loginInfo);
+                    user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+                    await UserManager.CreateAsync(user);
+                    if (!string.IsNullOrEmpty(model.LoginProvider) && !string.IsNullOrEmpty(model.ProviderKey))
+                    {
+                        UserLoginInfo loginInfo = new UserLoginInfo(model.LoginProvider, model.ProviderKey);
+                        await UserManager.AddLoginAsync(user.Id, loginInfo);
+                    }
                 }
-            }
-            ClaimsIdentity oAuthIdentity = new ClaimsIdentity(Startup.OAuthOptions.AuthenticationType);
-            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
-            oAuthIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
-            AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, new AuthenticationProperties());
-            DateTime currentUtc = DateTime.UtcNow;
-            ticket.Properties.IssuedUtc = currentUtc;
-            ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromDays(365));
-            string accessToken = Startup.OAuthOptions.AccessTokenFormat.Protect(ticket);
-            Request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            TokenResponse token = new TokenResponse()
-            {
-                access_token = accessToken,
-                token_type = "bearer",
-                expires = currentUtc.Add(TimeSpan.FromDays(365)).ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
-                issued = currentUtc.ToString("ddd, dd MMM yyyy HH':'mm':'ss 'GMT'"),
-                expires_in = TimeSpan.FromDays(365).TotalSeconds.ToString(),
-                userName = user.UserName,
-                userId = user.Id
+                ClaimsIdentity oAuthIdentity = new ClaimsIdentity(Startup.OAuthOptions.AuthenticationType);
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
+                oAuthIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
+                AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, new AuthenticationProperties());
+                DateTime currentUtc = DateTime.UtcNow;
+                ticket.Properties.IssuedUtc = currentUtc;
+                ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromDays(365));
+                string accessToken = Startup.OAuthOptions.AccessTokenFormat.Protect(ticket);
+                Request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                TokenResponse token = new TokenResponse()
+                {
+                    access_token = accessToken,
+                    token_type = "bearer",
+                    expires = currentUtc.Add(TimeSpan.FromDays(365)).ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
+                    issued = currentUtc.ToString("ddd, dd MMM yyyy HH':'mm':'ss 'GMT'"),
+                    expires_in = TimeSpan.FromDays(365).TotalSeconds.ToString(),
+                    userName = user.UserName,
+                    userId = user.Id
 
-            };
-            ServiceResponse serviceResponse = new ServiceResponse()
+                };
+                ServiceResponse serviceResponse = new ServiceResponse()
+                {
+                    Data = token,
+                    IsSuccessful = true
+                };
+                return Ok(serviceResponse);
+            }
+            else
             {
-                Data = token,
-                IsSuccessful = true
-            };
-            return Ok(serviceResponse);
+                ServiceResponse serviceResponse = new ServiceResponse()
+                {
+                    Data = null,
+                    IsSuccessful = false
+                };
+                return Ok(serviceResponse);
+            }
+            
         }
 
         protected override void Dispose(bool disposing)

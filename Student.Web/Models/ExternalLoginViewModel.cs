@@ -20,5 +20,7 @@ namespace Student.Web.Models
         public string LoginProvider { get; set; }
         public string Email { get; set; }
         public string ProviderKey { get; set; }
+        public string Key { get; set; }
+
     }
 }
